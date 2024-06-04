@@ -9,7 +9,7 @@ const initialFormValues = {
 export default function LoginForm(props) {
   const [values, setValues] = useState(initialFormValues)
   // ✨ where are my props? Destructure them here
-  const { setMessage } = props
+  const { login } = props
 
   const onChange = evt => {
     const { id, value } = evt.target
@@ -18,30 +18,7 @@ export default function LoginForm(props) {
 
   const onSubmit = evt => {
     evt.preventDefault()
-    const postLogin = async () => {
-      try {
-        const response = await fetch('http://localhost:9000/api/login', {
-          method: 'POST',
-          body: JSON.stringify({ ...values }),
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-
-        if (!response.ok) {
-          throw new Error('Problem POSTing login...')
-        }
-
-        const { message, token } = await response.json()
-        
-        localStorage.setItem('token', token)
-        setMessage(message)
-
-      } catch (error) {
-        console.error(error)
-      }
-    }
-    postLogin()
+    login(values)
   }
 
   const isDisabled = () => {
