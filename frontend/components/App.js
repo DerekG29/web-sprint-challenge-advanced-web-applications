@@ -18,7 +18,7 @@ export default function App() {
 
   // ✨ Research `useNavigate` in React Router v.6
   const navigate = useNavigate()
-  const redirectToLogin = () => { /* ✨ implement */ }
+  const redirectToLogin = () =>  navigate('/')
   const redirectToArticles = () => navigate('articles')
 
   const logout = () => {
@@ -27,9 +27,20 @@ export default function App() {
     // and a message saying "Goodbye!" should be set in its proper state.
     // In any case, we should redirect the browser back to the login screen,
     // using the helper above.
+    if (localStorage.getItem('token')) {
+      localStorage.removeItem('token')
+      setMessage('Goodbye!')
+    }
+    redirectToLogin()
   }
 
   const login = async ({ username, password }) => {
+    // ✨ implement
+    // We should flush the message state, turn on the spinner
+    // and launch a request to the proper endpoint.
+    // On success, we should set the token to local storage in a 'token' key,
+    // put the server success message in its proper state, and redirect
+    // to the Articles screen. Don't forget to turn off the spinner!
     setMessage('')
     setSpinnerOn(true)
     try {
