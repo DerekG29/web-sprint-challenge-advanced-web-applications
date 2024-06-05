@@ -82,7 +82,9 @@ export default function App() {
         }
       })
       if (response.status === 401 || !response.ok) {
+        const { message } = await response.json()
         redirectToLogin()
+        setMessage(message)
         setSpinnerOn(false)
         throw new Error(`Problem GETing articles... ${response.status}`)
       }
@@ -95,11 +97,35 @@ export default function App() {
     }
   }
 
-  const postArticle = article => {
+  const postArticle = async article => {
     // ✨ implement
     // The flow is very similar to the `getArticles` function.
     // You'll know what to do! Use log statements or breakpoints
     // to inspect the response from the server.
+    setMessage('')
+    setSpinnerOn(true)
+    try {
+      const response = await fetch('http://localhost:9000/api/articles', {
+        method: 'POST',
+        body: JSON.stringify({ ...article }),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": localStorage.getItem('token')
+        }
+      })
+      if (!response.ok) {
+        const { message } = await response.json()
+        setMessage(message)
+        setSpinnerOn(false)
+        throw new Error(`Problem POSTing new article... ${response.status}`)
+      }
+      const { message } = await response.json()
+      getArticles()
+      setMessage(message)
+      setSpinnerOn(false)
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   const updateArticle = ({ article_id, article }) => {
