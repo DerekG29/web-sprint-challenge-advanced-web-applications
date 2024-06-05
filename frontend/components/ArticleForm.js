@@ -41,15 +41,20 @@ export default function ArticleForm(props) {
       if (success) setValues(initialFormValues)
     } else {
       // update article
+      const { article_id } = currentArticle
+      const article = { ...values }
+      const success = updateArticle({ article_id, article })
+      if (success) setValues(initialFormValues)
     }
   }
 
   const isDisabled = () => {
     // ✨ implement
     // Make sure the inputs have some values
-    const titleHasValue = values.title.trim().length >= 1
-    const textHasValue = values.text.trim().length >= 1
-    const topicHasValue = values.topic.trim().length >= 1
+    const { title, text, topic } = values
+    const titleHasValue = title.trim().length >= 1
+    const textHasValue = text.trim().length >= 1
+    const topicHasValue = topic === 'JavaScript' || topic === 'React' || topic === 'Node'
     return !(titleHasValue && textHasValue && topicHasValue)
   }
 

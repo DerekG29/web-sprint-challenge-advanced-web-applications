@@ -132,9 +132,42 @@ export default function App() {
     return success
   }
 
-  const updateArticle = ({ article_id, article }) => {
+  const updateArticle = async ({ article_id, article }) => {
     // ✨ implement
     // You got this!
+    let success = null
+    setMessage('')
+    setSpinnerOn(true)
+    try {
+      const response = await fetch(`http://localhost:9000/api/articles/${article_id}`, {
+        method: 'PUT',
+        body: JSON.stringify(article),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": localStorage.getItem('token')
+        }
+      })
+      if (!response.ok) {
+        success = false
+        const data = await response.json()
+        setMessage(data.message)
+        setSpinnerOn(false)
+        throw new Error(`Problem PUTing article... ${response.status}`)
+      }
+      success = true
+      const data = await response.json()
+      setMessage(data.message)
+      setArticles(articles.map(art => {
+        if (art.article_id === article_id) {
+          return { article_id, ...data.article }
+        }
+        return art
+      }))
+      setSpinnerOn(false)
+    } catch (error) {
+      console.error(error)
+    }
+    return success
   }
 
   const deleteArticle = async article_id => {
