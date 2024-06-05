@@ -80,7 +80,7 @@ export default function ArticleForm(props) {
       </select>
       <div className="button-group">
         <button disabled={isDisabled()} id="submitArticle">Submit</button>
-        {currentArticle && <button onClick={Function.prototype}>Cancel edit</button>}
+        {currentArticle && <button onClick={() => setCurrentArticleId(null)}>Cancel edit</button>}
       </div>
     </form>
   )
