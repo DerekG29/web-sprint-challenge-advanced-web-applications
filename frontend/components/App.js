@@ -52,7 +52,7 @@ export default function App() {
         }
       })
       if (!response.ok) {
-        throw new Error('Problem POSTing login...')
+        throw new Error(`Problem POSTing login... ${response.status}`)
       }
       const { message, token } = await response.json()
       localStorage.setItem('token', token)
@@ -64,7 +64,7 @@ export default function App() {
     }
   }
 
-  const getArticles = () => {
+  const getArticles = async () => {
     // ✨ implement
     // We should flush the message state, turn on the spinner
     // and launch an authenticated request to the proper endpoint.
@@ -73,6 +73,26 @@ export default function App() {
     // If something goes wrong, check the status of the response:
     // if it's a 401 the token might have gone bad, and we should redirect to login.
     // Don't forget to turn off the spinner!
+    setMessage('')
+    setSpinnerOn(true)
+    try {
+      const response = await fetch('http://localhost:9000/api/articles', {
+        headers: {
+          "Authorization": localStorage.getItem('token')
+        }
+      })
+      if (response.status === 401 || !response.ok) {
+        redirectToLogin()
+        setSpinnerOn(false)
+        throw new Error(`Problem GETing articles... ${response.status}`)
+      }
+      const { message, articles } = await response.json()
+      setMessage(message)
+      setArticles(articles)
+      setSpinnerOn(false)
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   const postArticle = article => {
@@ -108,7 +128,7 @@ export default function App() {
           <Route path="articles" element={
             <>
               <ArticleForm />
-              <Articles />
+              <Articles getArticles={getArticles} articles={articles} />
             </>
           } />
         </Routes>
