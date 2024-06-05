@@ -21,6 +21,8 @@ export default function ArticleForm(props) {
     if (currentArticle) {
       const { text, title, topic } = currentArticle
       setValues({ text, title, topic })
+    } else {
+      setValues(initialFormValues)
     }
   }, [currentArticle])
 
@@ -37,12 +39,18 @@ export default function ArticleForm(props) {
     if (!currentArticle) {
       const success = postArticle(values)
       if (success) setValues(initialFormValues)
+    } else {
+      // update article
     }
   }
 
   const isDisabled = () => {
     // ✨ implement
     // Make sure the inputs have some values
+    const titleHasValue = values.title.length >= 1
+    const textHasValue = values.text.length >= 1
+    const topicHasValue = values.topic != ''
+    return !(titleHasValue && textHasValue && topicHasValue)
   }
 
   return (
@@ -72,7 +80,7 @@ export default function ArticleForm(props) {
       </select>
       <div className="button-group">
         <button disabled={isDisabled()} id="submitArticle">Submit</button>
-        <button onClick={Function.prototype}>Cancel edit</button>
+        {currentArticle && <button onClick={Function.prototype}>Cancel edit</button>}
       </div>
     </form>
   )
