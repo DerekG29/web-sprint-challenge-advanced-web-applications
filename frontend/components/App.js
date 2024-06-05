@@ -137,8 +137,30 @@ export default function App() {
     // You got this!
   }
 
-  const deleteArticle = article_id => {
+  const deleteArticle = async article_id => {
     // ✨ implement
+    setMessage('')
+    setSpinnerOn(true)
+    try {
+      const response = await fetch(`http://localhost:9000/api/articles/${article_id}`, {
+        method: 'DELETE',
+        headers: {
+          "Authorization": localStorage.getItem('token')
+        }
+      })
+      if (!response.ok) {
+        const { message } = await response.json()
+        setMessage(message)
+        setSpinnerOn(false)
+        throw new Error(`Problem DELETEing atricle... ${response.status}`)
+      }
+      const data = await response.json()
+      setArticles(articles.filter(art => art.article_id != article_id))
+      setMessage(data.message)
+      setSpinnerOn(false)
+    } catch (error) {
+      console.error(error)
+    }
   }
 
   return (
