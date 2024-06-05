@@ -18,7 +18,11 @@ export default function ArticleForm(props) {
     // Every time the `currentArticle` prop changes, we should check it for truthiness:
     // if it's truthy, we should set its title, text and topic into the corresponding
     // values of the form. If it's not, we should reset the form back to initial values.
-  })
+    if (currentArticle) {
+      const { text, title, topic } = currentArticle
+      setValues({ text, title, topic })
+    }
+  }, [currentArticle])
 
   const onChange = evt => {
     const { id, value } = evt.target
