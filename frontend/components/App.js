@@ -102,6 +102,7 @@ export default function App() {
     // The flow is very similar to the `getArticles` function.
     // You'll know what to do! Use log statements or breakpoints
     // to inspect the response from the server.
+    let success = null
     setMessage('')
     setSpinnerOn(true)
     try {
@@ -114,18 +115,21 @@ export default function App() {
         }
       })
       if (!response.ok) {
+        success = false
         const { message } = await response.json()
         setMessage(message)
         setSpinnerOn(false)
         throw new Error(`Problem POSTing new article... ${response.status}`)
       }
-      const { message } = await response.json()
-      getArticles()
-      setMessage(message)
+      success = true
+      const data = await response.json()
+      setArticles(articles.concat(data.article))
+      setMessage(data.message)
       setSpinnerOn(false)
     } catch (error) {
       console.error(error)
     }
+    return success
   }
 
   const updateArticle = ({ article_id, article }) => {
