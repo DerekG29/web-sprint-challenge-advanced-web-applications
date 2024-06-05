@@ -44,7 +44,7 @@ export default function App() {
     setMessage('')
     setSpinnerOn(true)
     try {
-      const response = await fetch('http://localhost:9000/api/login', {
+      const response = await fetch(loginUrl, {
         method: 'POST',
         body: JSON.stringify({ username, password }),
         headers: {
@@ -76,7 +76,7 @@ export default function App() {
     setMessage('')
     setSpinnerOn(true)
     try {
-      const response = await fetch('http://localhost:9000/api/articles', {
+      const response = await fetch(articlesUrl, {
         headers: {
           "Authorization": localStorage.getItem('token')
         }
@@ -106,7 +106,7 @@ export default function App() {
     setMessage('')
     setSpinnerOn(true)
     try {
-      const response = await fetch('http://localhost:9000/api/articles', {
+      const response = await fetch(articlesUrl, {
         method: 'POST',
         body: JSON.stringify({ ...article }),
         headers: {
@@ -139,7 +139,7 @@ export default function App() {
     setMessage('')
     setSpinnerOn(true)
     try {
-      const response = await fetch(`http://localhost:9000/api/articles/${article_id}`, {
+      const response = await fetch(`${articlesUrl}/${article_id}`, {
         method: 'PUT',
         body: JSON.stringify(article),
         headers: {
@@ -175,7 +175,7 @@ export default function App() {
     setMessage('')
     setSpinnerOn(true)
     try {
-      const response = await fetch(`http://localhost:9000/api/articles/${article_id}`, {
+      const response = await fetch(`${articlesUrl}/${article_id}`, {
         method: 'DELETE',
         headers: {
           "Authorization": localStorage.getItem('token')
