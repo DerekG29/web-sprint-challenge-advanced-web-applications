@@ -5,7 +5,6 @@ const initialFormValues = { title: '', text: '', topic: '' }
 
 export default function ArticleForm(props) {
   const [values, setValues] = useState(initialFormValues)
-  // ✨ where are my props? Destructure them here
   const {
     postArticle,
     updateArticle,
@@ -14,10 +13,6 @@ export default function ArticleForm(props) {
   } = props
 
   useEffect(() => {
-    // ✨ implement
-    // Every time the `currentArticle` prop changes, we should check it for truthiness:
-    // if it's truthy, we should set its title, text and topic into the corresponding
-    // values of the form. If it's not, we should reset the form back to initial values.
     if (currentArticle) {
       const { text, title, topic } = currentArticle
       setValues({ text, title, topic })
@@ -33,14 +28,10 @@ export default function ArticleForm(props) {
 
   const onSubmit = evt => {
     evt.preventDefault()
-    // ✨ implement
-    // We must submit a new post or update an existing one,
-    // depending on the truthyness of the `currentArticle` prop.
     if (!currentArticle) {
       const success = postArticle(values)
       if (success) setValues(initialFormValues)
     } else {
-      // update article
       const { article_id } = currentArticle
       const article = { ...values }
       const success = updateArticle({ article_id, article })
@@ -49,8 +40,6 @@ export default function ArticleForm(props) {
   }
 
   const isDisabled = () => {
-    // ✨ implement
-    // Make sure the inputs have some values
     const { title, text, topic } = values
     const titleHasValue = title.trim().length >= 1
     const textHasValue = text.trim().length >= 1
@@ -59,8 +48,6 @@ export default function ArticleForm(props) {
   }
 
   return (
-    // ✨ fix the JSX: make the heading display either "Edit" or "Create"
-    // and replace Function.prototype with the correct function
     <form id="form" onSubmit={onSubmit}>
       <h2>Create Article</h2>
       <input
