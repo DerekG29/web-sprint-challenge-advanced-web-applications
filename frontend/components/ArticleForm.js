@@ -29,14 +29,13 @@ export default function ArticleForm(props) {
   const onSubmit = evt => {
     evt.preventDefault()
     if (!currentArticle) {
-      const success = postArticle(values)
-      if (success) setValues(initialFormValues)
+      postArticle(values)
     } else {
       const { article_id } = currentArticle
       const article = { ...values }
-      const success = updateArticle({ article_id, article })
-      if (success) setValues(initialFormValues)
+      updateArticle({ article_id, article })
     }
+    setValues(initialFormValues)
   }
 
   const isDisabled = () => {

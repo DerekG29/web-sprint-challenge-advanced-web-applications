@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import axios from 'axios'
 import { NavLink, Routes, Route, useNavigate } from 'react-router-dom'
 import Articles from './Articles'
 import LoginForm from './LoginForm'
@@ -8,6 +9,10 @@ import Spinner from './Spinner'
 
 const articlesUrl = 'http://localhost:9000/api/articles'
 const loginUrl = 'http://localhost:9000/api/login'
+
+const setToken = token => localStorage.setItem('token', token)
+const getToken = () => localStorage.getItem('token')
+const deleteToken = () => localStorage.removeItem('token')
 
 export default function App() {
   const [message, setMessage] = useState('')
@@ -21,114 +26,88 @@ export default function App() {
 
   const logout = () => {
     if (localStorage.getItem('token')) {
-      localStorage.removeItem('token')
+      deleteToken()
       setMessage('Goodbye!')
     }
     redirectToLogin()
   }
 
-  const login = async ({ username, password }) => {
+  const login = ({ username, password }) => {
     setMessage('')
     setSpinnerOn(true)
-    try {
-      const response = await fetch(loginUrl, {
-        method: 'POST',
-        body: JSON.stringify({ username, password }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      if (!response.ok) {
-        throw new Error(`Problem POSTing login... ${response.status}`)
-      }
-      const { message, token } = await response.json()
-      localStorage.setItem('token', token)
-      setMessage(message)
-      setSpinnerOn(false)
+    axios.post(loginUrl, {
+      username,
+      password
+    })
+    .then(({ data }) => {
+      setToken(data.token)
+      setMessage(data.message)
       redirectToArticles()
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
-  const getArticles = async () => {
-    setMessage('')
-    setSpinnerOn(true)
-    try {
-      const response = await fetch(articlesUrl, {
-        headers: {
-          "Authorization": localStorage.getItem('token')
-        }
-      })
-      if (response.status === 401 || !response.ok) {
-        const { message } = await response.json()
-        redirectToLogin()
-        setMessage(message)
-        setSpinnerOn(false)
-        throw new Error(`Problem GETing articles... ${response.status}`)
-      }
-      const { message, articles } = await response.json()
-      setMessage(message)
-      setArticles(articles)
+    })
+    .catch(err => {
+      console.log(err)
+    })
+    .finally(() => {
       setSpinnerOn(false)
-    } catch (error) {
-      console.error(error)
-    }
+    })
   }
 
-  const postArticle = async article => {
-    let success = null
+  const getArticles = () => {
     setMessage('')
     setSpinnerOn(true)
-    try {
-      const response = await fetch(articlesUrl, {
-        method: 'POST',
-        body: JSON.stringify({ ...article }),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": localStorage.getItem('token')
-        }
-      })
-      if (!response.ok) {
-        success = false
-        const { message } = await response.json()
-        setMessage(message)
-        setSpinnerOn(false)
-        throw new Error(`Problem POSTing new article... ${response.status}`)
+    axios.get(articlesUrl, {
+      headers: {
+        "Authorization": getToken(),
       }
-      success = true
-      const data = await response.json()
+    })
+    .then(({ data }) => {
+      setMessage(data.message)
+      setArticles(data.articles)
+    })
+    .catch(({ response }) => {
+      redirectToLogin()
+      setMessage(response.data.message)
+    })
+    .finally(() => {
+      setSpinnerOn(false)
+    })
+  }
+
+  const postArticle = article => {
+    setMessage('')
+    setSpinnerOn(true)
+    axios.post(articlesUrl, {
+      ...article
+    }, {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": getToken()
+      }
+    })
+    .then(({ data }) => {
       setArticles(articles.concat(data.article))
       setMessage(data.message)
+    })
+    .catch(err => {
+      setMessage(err.response.data.message)
+    })
+    .finally(() => {
       setSpinnerOn(false)
-    } catch (error) {
-      console.error(error)
-    }
-    return success
-  }
+    })
+  } 
 
-  const updateArticle = async ({ article_id, article }) => {
-    let success = null
+  const updateArticle = ({ article_id, article }) => {
     setMessage('')
     setSpinnerOn(true)
-    try {
-      const response = await fetch(`${articlesUrl}/${article_id}`, {
-        method: 'PUT',
-        body: JSON.stringify(article),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": localStorage.getItem('token')
-        }
-      })
-      if (!response.ok) {
-        success = false
-        const data = await response.json()
-        setMessage(data.message)
-        setSpinnerOn(false)
-        throw new Error(`Problem PUTing article... ${response.status}`)
+    axios.put(`${articlesUrl}/${article_id}`, {
+      ...article
+    }, {
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": getToken(),
       }
-      success = true
-      const data = await response.json()
+    })
+    .then(({ data }) => {
       setMessage(data.message)
       setArticles(articles.map(art => {
         if (art.article_id === article_id) {
@@ -136,36 +115,35 @@ export default function App() {
         }
         return art
       }))
+      setCurrentArticleId(null)
+    })
+    .catch(err => {
+      setMessage(err.response.data.message)
+    })
+    .finally(() => {
       setSpinnerOn(false)
-    } catch (error) {
-      console.error(error)
-    }
-    return success
+    })
   }
 
-  const deleteArticle = async article_id => {
+  const deleteArticle = article_id => {
     setMessage('')
     setSpinnerOn(true)
-    try {
-      const response = await fetch(`${articlesUrl}/${article_id}`, {
-        method: 'DELETE',
-        headers: {
-          "Authorization": localStorage.getItem('token')
-        }
-      })
-      if (!response.ok) {
-        const { message } = await response.json()
-        setMessage(message)
-        setSpinnerOn(false)
-        throw new Error(`Problem DELETEing atricle... ${response.status}`)
+    axios.delete(`${articlesUrl}/${article_id}`, {
+      headers: {
+        "Authorization": getToken()
       }
-      const data = await response.json()
+    })
+    .then(({ data }) => {
       setArticles(articles.filter(art => art.article_id != article_id))
       setMessage(data.message)
+      setCurrentArticleId(null)
+    })
+    .catch(err => {
+      setMessage(err.response.data.message)
+    })
+    .finally(() => {
       setSpinnerOn(false)
-    } catch (error) {
-      console.error(error)
-    }
+    })
   }
 
   return (
